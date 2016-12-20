@@ -32,6 +32,7 @@ func Router() http.Handler {
 	root := router.Group("/api/1.0")
 	{
 		root.POST("/bw", apiMeasureBW)
+		root.GET("/bwm/:dest", apiMeasureBWM)
 		root.GET("/bw/:name", apiServeFile)
 		root.GET("/ping", apiPing)
 	}

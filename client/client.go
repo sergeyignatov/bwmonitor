@@ -88,5 +88,5 @@ func (c *Client) DownloadSpeed() (int, error) {
 			return 0, t.err
 		}
 	}
-	return int(tb / 1024 / time.Now().Sub(start).Seconds()), nil
+	return int(tb / time.Now().Sub(start).Seconds()), nil
 }
