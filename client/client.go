@@ -68,9 +68,10 @@ func (c *Client) DownloadSpeed() (int, error) {
 	connections := 4
 	wg.Add(connections)
 	ch := make(chan R, 0)
+	start := time.Now()
 	for t := 0; t < connections; t++ {
 		go func(tt int) {
-			s, t, err := c.download(random(128*1024, 768*1024))
+			s, t, err := c.download(random(1*1024*1024, 5*1024*1024))
 			ch <- R{s, t, err}
 			wg.Done()
 		}(t)
@@ -87,11 +88,5 @@ func (c *Client) DownloadSpeed() (int, error) {
 			return 0, t.err
 		}
 	}
-	return int(tb / 1024 / 1024 / tt), nil
-	/*s, t, err := c.download(128 * 1024 * 1024)
-	if err != nil {
-		return 0, err
-	}
-	return float64(s) / float64(1024) / float64(1024) / t, nil*/
-
+	return int(tb / 1024 / time.Now().Sub(start).Seconds()), nil
 }
