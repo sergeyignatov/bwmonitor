@@ -26,7 +26,7 @@ func genetateRandName(n int) string {
 
 func NewClient(dest string) *Client {
 	client := &http.Client{
-		Timeout: time.Second * 2,
+		Timeout: time.Second * 15,
 	}
 
 	return &Client{dest, client}
