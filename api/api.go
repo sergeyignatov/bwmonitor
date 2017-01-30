@@ -16,11 +16,11 @@ func apiPing(c *gin.Context) {
 func apiMeasureBWM(c *gin.Context) {
 	dest := c.Params.ByName("dest")
 	cc := client.NewClient(dest)
-	t, err := cc.DownloadSpeed()
-	if err != nil {
+	t, _ := cc.DownloadSpeed()
+	/*if err != nil {
 		Fail(c, err)
 		return
-	}
+	}*/
 	c.JSON(200, common.NewApiResponse(t))
 }
 func apiMeasureBW(c *gin.Context) {
@@ -30,11 +30,11 @@ func apiMeasureBW(c *gin.Context) {
 		return
 	}
 	cc := client.NewClient(dest)
-	t, err := cc.DownloadSpeed()
-	if err != nil {
+	t, _ := cc.DownloadSpeed()
+	/*if err != nil {
 		Fail(c, err)
 		return
-	}
+	}*/
 	c.JSON(200, common.NewApiResponse(t))
 }
 
