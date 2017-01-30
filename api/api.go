@@ -15,26 +15,33 @@ func apiPing(c *gin.Context) {
 }
 func apiMeasureBWM(c *gin.Context) {
 	dest := c.Params.ByName("dest")
-	cc := client.NewClient(dest)
+	timeout_str := c.Request.URL.Query().Get("timeout")
+	timeout := 9
+	if timeout_str != "" {
+		if i, err := strconv.Atoi(string(timeout_str)); err == nil {
+			timeout = i
+		}
+	}
+	cc := client.NewClient(dest, timeout)
 	t, _ := cc.DownloadSpeed()
-	/*if err != nil {
-		Fail(c, err)
-		return
-	}*/
 	c.JSON(200, common.NewApiResponse(t))
 }
+
 func apiMeasureBW(c *gin.Context) {
 	dest := c.PostForm("dest")
+	timeout_str := c.PostForm("timeout")
+	timeout := 9
+	if timeout_str != "" {
+		if i, err := strconv.Atoi(string(timeout_str)); err == nil {
+			timeout = i
+		}
+	}
 	if dest == "" {
 		Fail(c, fmt.Errorf("no dest"))
 		return
 	}
-	cc := client.NewClient(dest)
+	cc := client.NewClient(dest, timeout)
 	t, _ := cc.DownloadSpeed()
-	/*if err != nil {
-		Fail(c, err)
-		return
-	}*/
 	c.JSON(200, common.NewApiResponse(t))
 }
 
