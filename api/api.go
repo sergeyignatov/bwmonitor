@@ -22,7 +22,7 @@ func apiMeasureBWM(c *gin.Context) {
 			timeout = i
 		}
 	}
-	cc := client.NewClient(dest, timeout)
+	cc := client.NewClient(dest, timeout, context)
 	t, _ := cc.DownloadSpeed()
 	c.JSON(200, common.NewApiResponse(t))
 }
@@ -40,7 +40,7 @@ func apiMeasureBW(c *gin.Context) {
 		Fail(c, fmt.Errorf("no dest"))
 		return
 	}
-	cc := client.NewClient(dest, timeout)
+	cc := client.NewClient(dest, timeout, context)
 	t, _ := cc.DownloadSpeed()
 	c.JSON(200, common.NewApiResponse(t))
 }

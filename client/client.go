@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"github.com/sergeyignatov/bwmonitor/common"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -12,8 +13,10 @@ import (
 const letterBytes = "abcdefghijklmnopqrstuvwxyz"
 
 type Client struct {
-	dest   string
-	client *http.Client
+	dest     string
+	client   *http.Client
+	context  *common.Context
+	minBytes int
 }
 
 func genetateRandName(n int) string {
@@ -24,12 +27,21 @@ func genetateRandName(n int) string {
 	return string(b)
 }
 
-func NewClient(dest string, timeout int) *Client {
+func (c *Client) setHistory(delta time.Duration) {
+
+	c.context.History[c.dest] = common.History{delta, c.minBytes}
+}
+func (c *Client) getHistory() (common.History, bool) {
+	t, ok := c.context.History[c.dest]
+	return t, ok
+}
+
+func NewClient(dest string, timeout int, context *common.Context) *Client {
 	client := &http.Client{
 		Timeout: time.Second * time.Duration(timeout),
 	}
 
-	return &Client{dest, client}
+	return &Client{dest, client, context, 1 * 1024 * 1024}
 }
 
 func (c *Client) download(size int) (int, float64, error) {
@@ -64,9 +76,28 @@ func (c *Client) DownloadSpeed() (int, error) {
 	wg.Add(connections)
 	ch := make(chan R, 0)
 	start := time.Now()
+	minBytes := 128 * 1024
+	maxBytes := 100 * 1024 * 1024
+	if t, ok := c.getHistory(); ok != false {
+		var tmp int
+		if t.Duration.Seconds() < 1 {
+			tmp = int(float64(t.MinBytes) * (1.0 / t.Duration.Seconds()))
+		} else {
+			tmp = int(float64(t.MinBytes) / t.Duration.Seconds())
+		}
+		if tmp > minBytes && tmp < maxBytes {
+			t.MinBytes = tmp
+		} else if tmp < minBytes {
+			t.MinBytes = minBytes
+		} else if tmp >= maxBytes {
+			t.MinBytes = maxBytes
+		}
+		c.minBytes = t.MinBytes
+	}
+	fmt.Println(c.minBytes)
 	for t := 0; t < connections; t++ {
 		go func(tt int) {
-			s, t, err := c.download(random(1*1024*1024, 5*1024*1024))
+			s, t, err := c.download(random(c.minBytes, c.minBytes*5))
 			ch <- R{s, t, err}
 			wg.Done()
 		}(t)
@@ -80,5 +111,6 @@ func (c *Client) DownloadSpeed() (int, error) {
 		tb += float64(t.bodylen)
 		tt += t.spend
 	}
+	c.setHistory(time.Now().Sub(start))
 	return int(tb / time.Now().Sub(start).Seconds()), nil
 }

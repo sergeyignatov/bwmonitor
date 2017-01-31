@@ -1,9 +1,8 @@
 package main
 
 import (
-	//"flag"
-	//"fmt"
 	"github.com/sergeyignatov/bwmonitor/api"
+	"github.com/sergeyignatov/bwmonitor/common"
 	"github.com/urfave/cli"
 	"net/http"
 	"os"
@@ -12,11 +11,8 @@ import (
 var revision string
 
 func run(c *cli.Context) error {
-
-	//listen := flag.String("listen", ":5312", "host:port for HTTP listening")
-	//flag.Parse()
-	err := http.ListenAndServe(c.String("listen"), api.Router())
-	return err
+	context := common.NewContext()
+	return http.ListenAndServe(c.String("listen"), api.Router(&context))
 }
 
 func main() {

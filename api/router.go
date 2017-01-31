@@ -10,14 +10,17 @@ import (
 	"time"
 )
 
+var context *common.Context
+
 func Fail(c *gin.Context, err error) {
 	c.Error(err)
 	c.JSON(500, common.NewApiResponse(err))
 }
 
-func Router() http.Handler {
+func Router(c *common.Context) http.Handler {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
+	context = c
 	router.Use(cors.Middleware(cors.Config{
 		Origins:         "*",
 		Methods:         "GET, PUT, POST, DELETE",
