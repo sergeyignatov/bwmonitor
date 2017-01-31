@@ -43,13 +43,8 @@ func (c *Client) download(size int) (int, float64, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return 0, 0, err
-	}
-	bodyLen := len(body)
-	finish := time.Now()
-	return bodyLen, finish.Sub(start).Seconds(), nil
+	body, _ := ioutil.ReadAll(resp.Body)
+	return len(body), time.Now().Sub(start).Seconds(), nil
 }
 
 type R struct {
@@ -84,9 +79,6 @@ func (c *Client) DownloadSpeed() (int, error) {
 	for t := range ch {
 		tb += float64(t.bodylen)
 		tt += t.spend
-		if t.err != nil {
-			return 0, t.err
-		}
 	}
 	return int(tb / time.Now().Sub(start).Seconds()), nil
 }
