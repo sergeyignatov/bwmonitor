@@ -94,10 +94,10 @@ func (c *Client) DownloadSpeed() (int, error) {
 		}
 		c.minBytes = t.MinBytes
 	}
-	fmt.Println(c.minBytes)
+	//fmt.Println(c.minBytes)
 	for t := 0; t < connections; t++ {
 		go func(tt int) {
-			s, t, err := c.download(random(c.minBytes, c.minBytes*5))
+			s, t, err := c.download(random(c.minBytes/2, 2*c.minBytes))
 			ch <- R{s, t, err}
 			wg.Done()
 		}(t)
