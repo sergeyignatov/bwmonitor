@@ -24,6 +24,7 @@ func apiMeasureBWM(c *gin.Context) {
 	}
 	cc := client.NewClient(dest, timeout, context)
 	t, _ := cc.DownloadSpeed()
+
 	c.JSON(200, common.NewApiResponse(t))
 }
 

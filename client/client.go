@@ -36,11 +36,24 @@ func (c *Client) getHistory() (common.History, bool) {
 	return t, ok
 }
 
-func NewClient(dest string, timeout int, context *common.Context) *Client {
+func NewHTTPClient(timeout int) *http.Client {
 	client := &http.Client{
+		Transport: &http.Transport{
+			MaxIdleConnsPerHost: 32,
+		},
 		Timeout: time.Second * time.Duration(timeout),
 	}
+	return client
+}
 
+func NewClient(dest string, timeout int, context *common.Context) *Client {
+	client, ok := context.Client[dest]
+	if !ok {
+		client = NewHTTPClient(timeout)
+		context.Client[dest] = client
+	} else {
+		fmt.Println("reuse client")
+	}
 	return &Client{dest, client, context, 1 * 1024 * 1024}
 }
 
@@ -81,9 +94,11 @@ func (c *Client) DownloadSpeed() (int, error) {
 	if t, ok := c.getHistory(); ok != false {
 		var tmp int
 		if t.Duration.Seconds() < 1 {
-			tmp = int(float64(t.MinBytes) * (1.0 / t.Duration.Seconds()))
+			//tmp = int(float64(t.MinBytes) * (1.0 / t.Duration.Seconds()))
+			tmp = int(float64(t.MinBytes) * 1.2)
 		} else {
-			tmp = int(float64(t.MinBytes) / t.Duration.Seconds())
+			//tmp = int(float64(t.MinBytes) / t.Duration.Seconds())
+			tmp = int(float64(t.MinBytes) * 0.8)
 		}
 		if tmp > minBytes && tmp < maxBytes {
 			t.MinBytes = tmp
@@ -111,6 +126,7 @@ func (c *Client) DownloadSpeed() (int, error) {
 		tb += float64(t.bodylen)
 		tt += t.spend
 	}
-	c.setHistory(time.Now().Sub(start))
-	return int(tb / time.Now().Sub(start).Seconds()), nil
+	finish := time.Now().Sub(start)
+	c.setHistory(finish)
+	return int(tb / finish.Seconds()), nil
 }

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"net/http"
 	"time"
 )
 
@@ -23,8 +24,9 @@ type History struct {
 
 type Context struct {
 	History map[string]History
+	Client  map[string]*http.Client
 }
 
 func NewContext() Context {
-	return Context{make(map[string]History)}
+	return Context{make(map[string]History), make(map[string]*http.Client)}
 }
